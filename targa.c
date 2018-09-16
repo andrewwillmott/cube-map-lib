@@ -11,9 +11,6 @@
 * code.
 * -------------------------------------------------------------------------*/
 
-/*@unused@*/ static const char rcsid[] =
-"$Id: targa.c,v 1.2 2004/09/02 09:05:51 checker Exp $";
-
 #define TGA_KEEP_MACROS /* BIT, htole16, letoh16 */
 #include "targa.h"
 #include <stdlib.h>

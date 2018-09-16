@@ -1758,6 +1758,13 @@ inline Mat3f::Mat3f()
 {
 }
 
+inline Mat3f::Mat3f(const Mat3f& m)
+{
+    row[0] = m.row[0];
+    row[1] = m.row[1];
+    row[2] = m.row[2];
+}
+
 inline Vec3f& Mat3f::operator [] (int i)
 {
     ;
