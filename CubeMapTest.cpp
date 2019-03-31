@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "targa.c"
+#include "stb_image_mini.h"
 
 using namespace CML;
 
@@ -449,8 +449,6 @@ void TestDirToIndex()
 // Spherical cubemap normal map tests
 //------------------------------------------------------------------------------
 
-#include "targa.h"
-
 void CreateTestHMap(int size, uint16_t dst[])
 {
     int w = size;
@@ -483,13 +481,6 @@ void CreateTestHMap(int size, uint8_t dst[])
     }
 }
 
-void InitTGA4U8(tga_image* tga, cPixel4U8* data, int size)
-{
-    init_tga_image(tga, (uint8_t*)data, size, size, 32);
-    tga->image_type = TGA_IMAGE_TYPE_BGR;
-    tga->image_descriptor &= ~TGA_T_TO_B_BIT;
-}
-
 void TestSphereMaps()
 {
     const float kR = 10.0f;     ///< Radius of sphere's zero height.
@@ -497,17 +488,12 @@ void TestSphereMaps()
 
     const int kSize = 256;
     
-    tga_image tga;
-
     {
         uint8_t hmap[kSize * kSize];
 
         CreateTestHMap(kSize, hmap);
 
-        init_tga_image(&tga, (uint8_t*)hmap, kSize, kSize, 8);
-        tga.image_type = TGA_IMAGE_TYPE_MONO;
-        tga.image_descriptor &= ~TGA_T_TO_B_BIT;
-        tga_write("sphere-hmap.tga", &tga);
+        stbi_write_png("sphere-hmap.png", kSize, kSize, 1, hmap, 0);
     }
 
     {
@@ -519,13 +505,11 @@ void TestSphereMaps()
 
         CreateNormalMap(kSize, kH / kR, hmap16, nmap);
 
-        InitTGA4U8(&tga, nmap, kSize);
-        tga_write("flat-nmap.tga", &tga);
+        stbi_write_png("flat-nmap.png", kSize, kSize, 4, nmap, 0);
 
         CreateSphereNormalMap(kSize, kR, kH, hmap16, nmap);
 
-        InitTGA4U8(&tga, nmap, kSize);
-        tga_write("sphere-nmap.tga", &tga);
+        stbi_write_png("sphere-nmap.png", kSize, kSize, 4, nmap, 0);
     }
 
     // Test full-on face/edge/corner handling version
@@ -559,18 +543,12 @@ void TestSphereMaps()
             UpdateFaceNormalMap(kR, kH, kSize, hmaps, nmaps, splats[i].mFace, cmin, cmax);
         }
 
-        InitTGA4U8(&tga, nmapsData[0], kSize);
-        tga_write("sphere-nmap-0.tga", &tga);
-        InitTGA4U8(&tga, nmapsData[1], kSize);
-        tga_write("sphere-nmap-1.tga", &tga);
-        InitTGA4U8(&tga, nmapsData[2], kSize);
-        tga_write("sphere-nmap-2.tga", &tga);
-        InitTGA4U8(&tga, nmapsData[3], kSize);
-        tga_write("sphere-nmap-3.tga", &tga);
-        InitTGA4U8(&tga, nmapsData[4], kSize);
-        tga_write("sphere-nmap-4.tga", &tga);
-        InitTGA4U8(&tga, nmapsData[5], kSize);
-        tga_write("sphere-nmap-5.tga", &tga);
+        stbi_write_png("sphere-nmap-0.png", kSize, kSize, 4, nmapsData[0], 0);
+        stbi_write_png("sphere-nmap-1.png", kSize, kSize, 4, nmapsData[1], 0);
+        stbi_write_png("sphere-nmap-2.png", kSize, kSize, 4, nmapsData[2], 0);
+        stbi_write_png("sphere-nmap-3.png", kSize, kSize, 4, nmapsData[3], 0);
+        stbi_write_png("sphere-nmap-4.png", kSize, kSize, 4, nmapsData[4], 0);
+        stbi_write_png("sphere-nmap-5.png", kSize, kSize, 4, nmapsData[5], 0);
     }
 }
 

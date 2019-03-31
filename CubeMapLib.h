@@ -11,11 +11,6 @@
 
 #include <stdint.h>
 
-// For testing, define TEST_CUBEMAP_UTILS or TEST_CUBEMAP_NMAP. (The latter requires linking
-// with targa.c.) E.g.,
-// g++ -D TEST_CUBEMAP_UTILS CubeMapLib.cpp -o cmltest && ./cmltest
-// g++ -D TEST_CUBEMAP_NMAP CubeMapLib.cpp targa.c -o cmltest && ./cmltest
-
 namespace CML
 {
     // --- Basic cube map mappings
@@ -194,13 +189,14 @@ namespace CML
 
     inline Vec3f CoordToDirection(const cCubeMapCoord& coord)
     {
-        Vec3f result;
         float u = coord.mU * 2.0f - 1.0f;
         float v = coord.mV * 2.0f - 1.0f;
         float invLen = 1.0f / sqrtf(sqr(u) + sqr(v) + 1.0f);
 
         const uint8_t* swizzle = kSwizzleTable[coord.mFace >> 1];
         float w = (coord.mFace & 1) ? -invLen : invLen;
+
+        Vec3f result;
 
         result[swizzle[0]] = u * w;
         result[swizzle[1]] = v * invLen;
@@ -211,13 +207,10 @@ namespace CML
 
     inline Mat3f GetFaceTransform(int face)
     {
-        Mat3f result;
-        result[0] = vl_0;
-        result[1] = vl_0;
-        result[2] = vl_0;
-
         const uint8_t* swizzle = kSwizzleTable[face >> 1];
         float w = (face & 1) ? -1.0f : 1.0f;
+
+        Mat3f result = vl_0;
 
         result[0][swizzle[0]] = w;
         result[1][swizzle[1]] = 1.0f;
@@ -236,22 +229,22 @@ namespace CML
         indices[2] = swizzle[2];
         
         Vec3f preSignVals(w, 1.0f, w);
-        (*signVals)[0] = preSignVals[swizzle[0]];
-        (*signVals)[1] = preSignVals[swizzle[1]];
-        (*signVals)[2] = preSignVals[swizzle[2]];
+        signVals->x = preSignVals[swizzle[0]];
+        signVals->y = preSignVals[swizzle[1]];
+        signVals->z = preSignVals[swizzle[2]];
     }
 
     inline cCubeMapCoord DirectionToCoord(const Vec3f& direction)
     {
+        const float x = direction.x;
+        const float y = direction.y;
+        const float z = direction.z;
+
+        const float ax = fabsf(x);
+        const float ay = fabsf(y);
+        const float az = fabsf(z);
+
         cCubeMapCoord result;
-
-        float x = direction[0];
-        float y = direction[1];
-        float z = direction[2];
-
-        float ax = fabsf(x);
-        float ay = fabsf(y);
-        float az = fabsf(z);
 
         if (az >= ax && az >= ay)
         {
@@ -277,8 +270,6 @@ namespace CML
 
     inline Vec3f IndexToDirection(int size, const cCubeMapIndex& index)
     {
-        Vec3f result;
-
         float invSize = 1.0f / size;
         float u = 2 * (index.mCol + 0.5f) * invSize - 1.0f;
         float v = 2 * (index.mRow + 0.5f) * invSize - 1.0f;
@@ -286,6 +277,8 @@ namespace CML
 
         const uint8_t* swizzle = kSwizzleTable[index.mFace >> 1];
         float w = (index.mFace & 1) ? -invLen : invLen;
+
+        Vec3f result;
 
         result[swizzle[0]] = u * w;
         result[swizzle[1]] = v * invLen;
@@ -296,12 +289,12 @@ namespace CML
 
     inline cCubeMapIndex DirectionToIndex(int size, const Vec3f& direction)
     {
-        cCubeMapIndex result;
+        const float ax = fabsf(direction.x);
+        const float ay = fabsf(direction.y);
+        const float az = fabsf(direction.z);
+        const float halfSize = 0.5f * size;
 
-        float ax = fabsf(direction[0]);
-        float ay = fabsf(direction[1]);
-        float az = fabsf(direction[2]);
-        float halfSize = 0.5f * size;
+        cCubeMapIndex result;
 
         if (az >= ax && az >= ay)
         {

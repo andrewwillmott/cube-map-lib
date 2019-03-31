@@ -615,9 +615,9 @@ void CML::CreateNormalMap(int size, float hscale, const uint16_t hmap[], cPixel4
 
             Vec3f v(norm_safe(Vec3f(horiz, vert, 1.0f)));
 
-            nmap[iu].mX = FloatToU8(0.5f * v[2] + 0.5f);
-            nmap[iu].mY = FloatToU8(0.5f * v[1] + 0.5f);
-            nmap[iu].mZ = FloatToU8(0.5f * v[0] + 0.5f);
+            nmap[iu].mX = FloatToU8(0.5f * v.z + 0.5f);
+            nmap[iu].mY = FloatToU8(0.5f * v.y + 0.5f);
+            nmap[iu].mZ = FloatToU8(0.5f * v.x + 0.5f);
             nmap[iu].mW = 255;
         }
 
@@ -650,9 +650,9 @@ void CML::CreateSphereNormalMap(int size, float r, float h, const uint16_t hmap[
 
             Vec3f v(norm_safe(NormalFromHFJacobian(s, t, h, horiz, vert)));
 
-            nmap[iu].mX = FloatToU8(0.5f * v[0] + 0.5f);
-            nmap[iu].mY = FloatToU8(0.5f * v[1] + 0.5f);
-            nmap[iu].mZ = FloatToU8(0.5f * v[2] + 0.5f);
+            nmap[iu].mX = FloatToU8(0.5f * v.x + 0.5f);
+            nmap[iu].mY = FloatToU8(0.5f * v.y + 0.5f);
+            nmap[iu].mZ = FloatToU8(0.5f * v.z + 0.5f);
             nmap[iu].mW = 255;
         }
 
@@ -676,10 +676,10 @@ void CML::UpdateFaceNormalMap
     // get bbox min and max corner
 
     // convert to actual indices into raw data
-    int startU = FloorToI32(minC[0] * size);
-    int startV = FloorToI32(minC[1] * size);
-    int endU   = FloorToI32(maxC[0] * size);
-    int endV   = FloorToI32(maxC[1] * size);
+    int startU = FloorToI32(minC.x * size);
+    int startV = FloorToI32(minC.y * size);
+    int endU   = FloorToI32(maxC.x * size);
+    int endV   = FloorToI32(maxC.y * size);
 
     // the main loop doesn't cross faces
     // mark edges needed
@@ -713,14 +713,12 @@ void CML::UpdateFaceNormalMap
 
     GetFaceMapping(face, &signMap, elemMap);
 
-    Mat3f mf = GetFaceTransform(face);
-
     float mx = signMap[0] * 0.5f;
     float my = signMap[1] * 0.5f;
     float mz = signMap[2] * 0.5f;
-    int ix = elemMap[0];
-    int iy = elemMap[1];
-    int iz = elemMap[2];
+    int   ix = elemMap[0];
+    int   iy = elemMap[1];
+    int   iz = elemMap[2];
 
     float rscale = hscale * float(1.0f / 65535.0f);
     float dscale = rscale * (size / 2.0f);         // inter-two-pixel space is 2/w
@@ -729,7 +727,7 @@ void CML::UpdateFaceNormalMap
 
     // Okay, do face interior: nice and easy, all cells are on the same face.
     const uint16_t* rowPixelsHMap = heightMaps[face] + (stride * startV);
-    cPixel4U8* rowPixelsNMap = normalMaps[face] + (stride * startV);
+    cPixel4U8*      rowPixelsNMap = normalMaps[face] + (stride * startV);
     cPixel4U8 pixel;
 
     float step = 2.0f / size;
